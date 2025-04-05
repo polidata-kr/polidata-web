@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>후보 당선 확률 차트</title>
+  <style>
+    /* 개선된 반응형 스타일 */
+    :root {
+      --background-color: #f8f9fa;
+      --container-bg: white;
+      --text-color: #333;
+      --border-color: #ddd;
+      --header-color: #1a73e8;
+      --button-color: #1a73e8;
+      --button-hover: #0d47a1;
+      --footer-color: #666;
+      --spinner-border: #f3f3f3;
+      --spinner-top: #1a73e8;
+      --box-shadow: rgba(0,0,0,0.1);
+    }
+    
+    .dark-mode {
+      --background-color: #121212;
+      --container-bg: #1e1e1e;
+      --text-color: #e0e0e0;
+      --border-color: #444;
+      --header-color: #4dabf7;
+      --button-color: #4dabf7;
+      --button-hover: #74c0fc;
+      --footer-color: #adb5bd;
+      --spinner-border: #333;
+      --spinner-top: #4dabf7;
+      --box-shadow: rgba(0,0,0,0.3);
+    }
+    
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: var(--container-bg);
+      border-radius: 10px;
+      box-shadow: 0 2px 10px var(--box-shadow);
+      transition: background-color 0.3s, box-shadow 0.3s;
+    }
+    
+    h1 {
+      text-align: center;
+      margin-bottom: 30px;
+      color: var(--header-color);
+      transition: color 0.3s;
+    }
+    
+    .chart-container {
+      position: relative;
+      margin: auto;
+      height: 70vh;
+      width: 100%;
+    }
+    
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+    }
+    
+    .loading-spinner {
+      border: 5px solid var(--spinner-border);
+      border-top: 5px solid var(--spinner-top);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+      transition: border-color 0.3s;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+    
+    .date-range {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 20px;
+      justify-content: center;
+    }
+    
+    .date-range label {
+      font-weight: bold;
+    }
+    
+    .date-range input {
+      padding: 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background-color: var(--container-bg);
+      color: var(--text-color);
+      transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+    }
+    
+    button {
+      background-color: var(--button-color);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s;
+    }
+    
+    button:hover {
+      background-color: var(--button-hover);
+    }
+    
+    .candidate-legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+      margin: 20px 0;
+    }
+    
+    .legend-item {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+    }
+    
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 5px;
+      border-radius: 3px;
+    }
+    
+    .legend-text {
+      font-size: 14px;
+    }
+    
+    .legend-text.inactive {
+      text-decoration: line-through;
+      opacity: 0.5;
+    }
+    
+    footer {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 12px;
+      color: var(--footer-color);
+      transition: color 0.3s;
+    }
+    
+    .theme-toggle {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    .theme-toggle-button {
+      background-color: var(--button-color);
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background-color 0.3s;
+    }
+    
+    .theme-toggle-button:hover {
+      background-color: var(--button-hover);
+    }
+    
+    .theme-icon {
+      font-size: 16px;
+    }
+    
+    @media (max-width: 768px) {
+      .chart-container {
+        height: 60vh;
+      }
+      
+      h1 {
+        font-size: 1.5rem;
+      }
+      
+      .theme-toggle {
+        top: 10px;
+        right: 10px;
+      }
+    }
+  </style>
+  <!-- Google Fonts - Noto Sans KR -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="theme-toggle">
+    <button id="themeToggle" class="theme-toggle-button">
+      <span class="theme-icon">🌙</span> 다크모드
+    </button>
+  </div>
+  <div class="container">
+    <h1>2025 대선 후보별 당선 확률 트렌드</h1>
+    
+    <div class="date-range">
+      <label for="startDate">시작일:</label>
+      <input type="date" id="startDate">
+      <label for="endDate">종료일:</label>
+      <input type="date" id="endDate">
+      <button id="applyDateFilter">적용</button>
+      <button id="resetDateFilter">초기화</button>
+      <button id="lastWeek">직전 일주일</button>
+      <button id="last30Days">직전 30일</button>
+      <button id="last3Months">직전 3개월</button>
+    </div>
+    
+    <div class="candidate-legend" id="candidateLegend">
+      <!-- 자바스크립트로 동적 생성됨 -->
+    </div>
+    
+    <div class="chart-container">
+      <div id="loadingIndicator" class="loading">
+        <div class="loading-spinner"></div>
+        <p>데이터를 불러오는 중입니다...</p>
+      </div>
+      <canvas id="electionChart"></canvas>
+    </div>
+    
+    <div class="controls">
+      <button id="toggleAllCandidates">모든 후보 표시/숨김</button>
+    </div>
+    
+    <footer>
+      데이터 출처: Google Sheets 공개 CSV | 마지막 업데이트: <span id="lastUpdate">로딩 중...</span>
+    </footer>
+  </div>
+
+  <!-- Chart.js (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Chart.js Datalabels 플러그인 (CDN) - 버전 변경 및 위치 조정 -->
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+  <!-- Papa Parse (CSV 파싱용, CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
+  <!-- 날짜 포맷팅을 위한 Day.js -->
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/dayjs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.7/locale/ko.js"></script>
+
+  <script>
+    // Chart.js Datalabels 플러그인 전역 변수 설정 - 오류 처리 추가
+    let ChartDataLabels = null;
+    try {
+      ChartDataLabels = window['chartjs-plugin-datalabels'];
+      // 플러그인 등록
+      Chart.register(ChartDataLabels);
+    } catch (e) {
+      console.error("Datalabels 플러그인 로드 오류:", e);
+    }
+    
+    // 다크모드 토글 기능
+    const themeToggle = document.getElementById('themeToggle');
+    const body = document.body;
+    const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+    
+    // 사용자 시스템 설정이나 로컬 스토리지에서 테마 설정 가져오기
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || (!savedTheme && prefersDarkScheme.matches)) {
+      body.classList.add('dark-mode');
+      themeToggle.innerHTML = '<span class="theme-icon">☀️</span> 라이트모드';
+    }
+    
+    themeToggle.addEventListener('click', () => {
+      if (body.classList.contains('dark-mode')) {
+        body.classList.remove('dark-mode');
+        localStorage.setItem('theme', 'light');
+        themeToggle.innerHTML = '<span class="theme-icon">🌙</span> 다크모드';
+        
+        // 차트 테마 업데이트 (라이트모드)
+        if (chart) {
+          chart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
+          chart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
+          chart.options.scales.x.ticks.color = '#666';
+          chart.options.scales.y.ticks.color = '#666';
+          chart.options.scales.x.title.color = '#666';
+          chart.options.scales.y.title.color = '#666';
+          chart.options.plugins.title.color = '#333';
+          // datalabels 배경색 업데이트
+          chart.update();
+        }
+      } else {
+        body.classList.add('dark-mode');
+        localStorage.setItem('theme', 'dark');
+        themeToggle.innerHTML = '<span class="theme-icon">☀️</span> 라이트모드';
+        
+        // 차트 테마 업데이트 (다크모드)
+        if (chart) {
+          chart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.1)';
+          chart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.1)';
+          chart.options.scales.x.ticks.color = '#adb5bd';
+          chart.options.scales.y.ticks.color = '#adb5bd';
+          chart.options.scales.x.title.color = '#e0e0e0';
+          chart.options.scales.y.title.color = '#e0e0e0';
+          chart.options.plugins.title.color = '#e0e0e0';
+          // datalabels 배경색 업데이트
+          chart.update();
+        }
+      }
+    });
+    
+    // 로딩 인디케이터 표시
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    
+    // Google Sheets 정보
+    const spreadsheetId = '1FBkYF5tZDBCFqyg1U-h9TLikdTDA1NUpxIFAGJ7eDvw'; // 실제 스프레드시트 ID
+    const sheetName = 'csv'; // 실제 시트 이름
+    const apiKey = 'AIzaSyBb2nNqLgPKBnOaWdr5dtAoc1U9Wn6v5IU'; // 실제 API 키
+
+    // Google Sheets API URL
+    const sheetsApiUrl = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${sheetName}?key=${apiKey}`;
+    
+    // 2) 후보자 컬럼 이름 (CSV 헤더와 동일하게)
+    //    "date_day" 외에 실제 후보 이름 컬럼 8개
+    const candidateLabels = [
+      "이재명", "김동연", "김문수", "한동훈",
+      "홍준표", "오세훈", "이준석", "이낙연"
+    ];
+    
+    // 3) 후보자별 색상 지정
+    const candidateColors = {
+      "이재명": "#152484", // 더불어민주당
+      "김동연": "#152484", // 더불어민주당
+      "김문수": "#E61E2B", // 국민의힘
+      "한동훈": "#E61E2B", // 국민의힘
+      "홍준표": "#E61E2B", // 국민의힘
+      "오세훈": "#E61E2B", // 국민의힘
+      "이준석": "#FF7210", // 개혁신당
+      "이낙연": "#45BABD"  // 새미래민주당
+    };
+    
+    // 후보자별 라인 스타일 설정
+    const candidateStyles = {
+      "이재명": { borderDash: [], pointStyle: 'circle' },
+      "김동연": { borderDash: [5, 5], pointStyle: 'triangle' },
+      "김문수": { borderDash: [], pointStyle: 'circle' },
+      "한동훈": { borderDash: [5, 5], pointStyle: 'triangle' },
+      "홍준표": { borderDash: [10, 10], pointStyle: 'rect' },
+      "오세훈": { borderDash: [15, 5], pointStyle: 'star' },
+      "이준석": { borderDash: [], pointStyle: 'circle' },
+      "이낙연": { borderDash: [], pointStyle: 'circle' }
+    };
+    
+    // 전역 변수
+    let chart = null;
+    let allData = [];
+    let filteredData = [];
+    let visibleCandidates = [...candidateLabels];
+    let thirtyDaysAgo;
+    let lastDate;
+    
+    // 날짜 형식 변환 (YYYY-MM-DD)
+    const formatDate = (date) => {
+      return date.toISOString().split('T')[0];
+    };
+    
+    // dayjs 한국어 로케일 설정
+    dayjs.locale('ko');
+    
+    // Google Sheets API를 사용하여 데이터 로드
+    // 참고: Google Sheets API를 사용하려면 다음 단계가 필요합니다:
+    // 1. Google Cloud Console(https://console.cloud.google.com/)에서 프로젝트 생성
+    // 2. Google Sheets API 활성화
+    // 3. API 키 생성 (제한사항: HTTP 리퍼러 제한 설정 권장)
+    // 4. 생성된 API 키를 위의 apiKey 변수에 입력
+    // 5. 스프레드시트 ID와 시트 이름 설정
+    //
+    // 실제 API 키가 설정되어 있으므로 Google Sheets API를 사용합니다.
+    loadDataFromGoogleSheetsApi(); // API를 통해 실제 데이터 로드
+    
+    // Google Sheets API를 사용하여 데이터 로드 함수
+    function loadDataFromGoogleSheetsApi() {
+      // 로딩 인디케이터 표시
+      loadingIndicator.style.display = 'block';
+      loadingIndicator.innerHTML = `
+        <div class="loading-spinner"></div>
+        <p>Google Sheets API에서 데이터를 불러오는 중입니다...</p>
+      `;
+      
+      fetch(sheetsApiUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP 오류: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          if (data && data.values && data.values.length > 0) {
+            // API 응답에서 데이터 추출 및 가공
+            const headers = data.values[0]; // 첫 번째 행은 헤더
+            const rows = data.values.slice(1); // 나머지 행은 데이터
+            
+            // 헤더와 데이터를 결합하여 객체 배열 생성
+            const parsedData = rows.map(row => {
+              const rowData = {};
+              headers.forEach((header, index) => {
+                rowData[header] = row[index] || '';
+              });
+              return rowData;
+            });
+            
+            processData(parsedData);
+            
+            // 실제 데이터 사용 알림
+            const footer = document.querySelector('footer');
+            footer.innerHTML = `데이터 출처: Google Sheets API | 마지막 업데이트: <span id="lastUpdate">로딩 중...</span>`;
+            updateLastUpdateDate();
+          } else {
+            throw new Error("API 응답에 데이터가 없거나 형식이 올바르지 않습니다.");
+          }
+        })
+        .catch(err => {
+          console.error("Google Sheets API 로드 중 오류:", err);
+          loadingIndicator.innerHTML = `
+            <p>Google Sheets API 데이터 로드 중 오류가 발생했습니다: ${err.message}</p>
+            <button id="retryFetch" style="margin-top: 20px;">다시 시도</button>
+          `;
+          
+          document.getElementById('retryFetch').addEventListener('click', () => {
+            loadDataFromGoogleSheetsApi();
+          });
+        });
+    }
+    
+    // 데이터 처리 공통 함수
+    function processData(data) {
+      allData = data;
+      
+      // 데이터 정렬 (날짜 내림차순)
+      allData.sort((a, b) => {
+        return new Date(b["date_day"]) - new Date(a["date_day"]);
+      });
+      
+      // 최근 30일 데이터만 필터링
+      lastDate = new Date(allData[0]["date_day"]);
+      thirtyDaysAgo = new Date(lastDate);
+      thirtyDaysAgo.setDate(lastDate.getDate() - 30);
+      
+      filteredData = allData.filter(row => {
+        const rowDate = new Date(row["date_day"]);
+        return rowDate >= thirtyDaysAgo && rowDate <= lastDate;
+      });
+      
+      // 날짜 필터 초기화
+      initializeDateFilters();
+      
+      // 후보자 레전드 생성
+      createCandidateLegend();
+      
+      // 마지막 업데이트 날짜 표시
+      updateLastUpdateDate();
+      
+      // 차트 렌더링
+      renderChart(filteredData);
+      
+      // 로딩 인디케이터 숨기기
+      loadingIndicator.style.display = 'none';
+    }
+    
+    // 날짜 필터 초기화
+    function initializeDateFilters() {
+      if (allData.length === 0) return;
+      
+      const startDateInput = document.getElementById('startDate');
+      const endDateInput = document.getElementById('endDate');
+      
+      // 데이터의 첫 날짜와 마지막 날짜 가져오기
+      const firstDate = new Date(allData[allData.length - 1]["date_day"]);
+      
+      // 입력 필드에 날짜 설정
+      startDateInput.value = formatDate(thirtyDaysAgo);
+      endDateInput.value = formatDate(lastDate);
+      
+      // 데이터가 있는 날짜들을 추출하여 배열로 저장
+      const availableDates = allData.map(row => row["date_day"]);
+      
+      // 날짜 입력 필드에 변경 이벤트 리스너 추가
+      startDateInput.addEventListener('input', function() {
+        validateDateInput(this, availableDates);
+      });
+      
+      endDateInput.addEventListener('input', function() {
+        validateDateInput(this, availableDates);
+      });
+      
+      // 이벤트 리스너 제거 후 다시 추가 (중복 방지)
+      document.getElementById('applyDateFilter').removeEventListener('click', applyDateFilter);
+      document.getElementById('resetDateFilter').removeEventListener('click', resetDateFilter);
+      document.getElementById('lastWeek').removeEventListener('click', () => setDateRange(7));
+      document.getElementById('last30Days').removeEventListener('click', () => setDateRange(30));
+      document.getElementById('last3Months').removeEventListener('click', () => setDateRange(90));
+      
+      // 날짜 필터 적용 버튼 이벤트
+      document.getElementById('applyDateFilter').addEventListener('click', applyDateFilter);
+      
+      // 날짜 필터 초기화 버튼 이벤트
+      document.getElementById('resetDateFilter').addEventListener('click', resetDateFilter);
+      
+      // 날짜 범위 버튼 이벤트 추가
+      document.getElementById('lastWeek').addEventListener('click', function() { setDateRange(7); });
+      document.getElementById('last30Days').addEventListener('click', function() { setDateRange(30); });
+      document.getElementById('last3Months').addEventListener('click', function() { setDateRange(90); });
+      
+      // 사용 가능한 날짜 목록을 설정
+      setAvailableDates(startDateInput, availableDates);
+      setAvailableDates(endDateInput, availableDates);
+    }
+    
+    // 날짜 입력 필드에 사용 가능한 날짜 설정
+    function setAvailableDates(dateInput, availableDates) {
+      // 기존 min, max 속성 설정
+      const firstAvailableDate = new Date(availableDates[availableDates.length - 1]);
+      const lastAvailableDate = new Date(availableDates[0]);
+      
+      dateInput.min = formatDate(firstAvailableDate);
+      dateInput.max = formatDate(lastAvailableDate);
+      
+      // 사용자 정의 데이터 속성에 사용 가능한 날짜 목록 저장
+      dateInput.dataset.availableDates = JSON.stringify(availableDates);
+    }
+    
+    // 날짜 입력 유효성 검사
+    function validateDateInput(input, availableDates) {
+      const selectedDate = input.value;
+      
+      // 선택된 날짜가 사용 가능한 날짜 목록에 없으면 가장 가까운 사용 가능한 날짜로 변경
+      if (!availableDates.includes(selectedDate)) {
+        // 가장 가까운 사용 가능한 날짜 찾기
+        const closestDate = findClosestDate(selectedDate, availableDates);
+        input.value = closestDate;
+        
+        // 사용자에게 알림
+        alert(`선택하신 날짜(${selectedDate})에는 데이터가 없습니다. 가장 가까운 날짜(${closestDate})로 변경되었습니다.`);
+      }
+    }
+    
+    // 가장 가까운 사용 가능한 날짜 찾기
+    function findClosestDate(targetDate, availableDates) {
+      const target = new Date(targetDate);
+      
+      // 날짜 차이를 계산하여 가장 가까운 날짜 찾기
+      let closestDate = availableDates[0];
+      let minDiff = Math.abs(target - new Date(availableDates[0]));
+      
+      for (let i = 1; i < availableDates.length; i++) {
+        const diff = Math.abs(target - new Date(availableDates[i]));
+        if (diff < minDiff) {
+          minDiff = diff;
+          closestDate = availableDates[i];
+        }
+      }
+      
+      return closestDate;
+    }
+    
+    // 날짜 필터 적용
+    function applyDateFilter() {
+      const startDate = new Date(document.getElementById('startDate').value);
+      const endDate = new Date(document.getElementById('endDate').value);
+      
+      // 종료일이 시작일보다 이전이면 경고
+      if (endDate < startDate) {
+        alert('종료일은 시작일 이후여야 합니다.');
+        return;
+      }
+      
+      // 날짜 범위에 맞는 데이터 필터링
+      filteredData = allData.filter(row => {
+        const rowDate = new Date(row["date_day"]);
+        return rowDate >= startDate && rowDate <= endDate;
+      });
+      
+      // 차트 다시 그리기
+      renderChart(filteredData);
+    }
+    
+    // 날짜 필터 초기화
+    function resetDateFilter() {
+      initializeDateFilters();
+      filteredData = [...allData];
+      renderChart(filteredData);
+    }
+    
+    // 후보자 레전드 생성
+    function createCandidateLegend() {
+      const legendContainer = document.getElementById('candidateLegend');
+      legendContainer.innerHTML = '';
+      
+      candidateLabels.forEach(candidate => {
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
+        legendItem.dataset.candidate = candidate;
+        
+        const colorBox = document.createElement('div');
+        colorBox.className = 'legend-color';
+        colorBox.style.backgroundColor = candidateColors[candidate];
+        
+        const text = document.createElement('span');
+        text.className = 'legend-text';
+        text.textContent = candidate;
+        
+        legendItem.appendChild(colorBox);
+        legendItem.appendChild(text);
+        
+        // 클릭 이벤트 추가
+        legendItem.addEventListener('click', () => toggleCandidate(candidate, text));
+        
+        legendContainer.appendChild(legendItem);
+      });
+      
+      // 모든 후보 표시/숨김 버튼 이벤트
+      document.getElementById('toggleAllCandidates').addEventListener('click', toggleAllCandidates);
+    }
+    
+    // 후보자 표시/숨김 토글
+    function toggleCandidate(candidate, textElement) {
+      const index = visibleCandidates.indexOf(candidate);
+      
+      if (index !== -1) {
+        // 후보자 숨기기
+        visibleCandidates.splice(index, 1);
+        textElement.classList.add('inactive');
+      } else {
+        // 후보자 표시
+        visibleCandidates.push(candidate);
+        textElement.classList.remove('inactive');
+      }
+      
+      // 차트 업데이트
+      updateChartVisibility();
+    }
+    
+    // 모든 후보자 표시/숨김 토글
+    function toggleAllCandidates() {
+      const legendTexts = document.querySelectorAll('.legend-text');
+      
+      if (visibleCandidates.length > 0) {
+        // 모든 후보자 숨기기
+        visibleCandidates = [];
+        legendTexts.forEach(text => text.classList.add('inactive'));
+      } else {
+        // 모든 후보자 표시
+        visibleCandidates = [...candidateLabels];
+        legendTexts.forEach(text => text.classList.remove('inactive'));
+      }
+      
+      // 차트 업데이트
+      updateChartVisibility();
+    }
+    
+    // 차트 가시성 업데이트
+    function updateChartVisibility() {
+      if (!chart) return;
+      
+      chart.data.datasets.forEach(dataset => {
+        const isVisible = visibleCandidates.includes(dataset.label);
+        dataset.hidden = !isVisible;
+      });
+      
+      chart.update();
+    }
+    
+    // 마지막 업데이트 날짜 표시
+    function updateLastUpdateDate() {
+      if (allData.length === 0) return;
+      
+      const lastDate = new Date(allData[0]["date_day"]);
+      const formattedDate = dayjs(lastDate).format('YYYY년 MM월 DD일');
+      
+      document.getElementById('lastUpdate').textContent = formattedDate;
+    }
+
+    // 차트를 그리는 함수
+    function renderChart(rows) {
+      // (1) X축 라벨로 사용할 배열 (date_day)
+      const labels = [];
+      // 원본 날짜 데이터 저장 배열 추가
+      const originalDates = [];
+
+      // (2) 후보자별 데이터 저장용 객체
+      //     예: { "이재명": [], "김동연": [], ... }
+      const candidateDataMap = {};
+      candidateLabels.forEach(candidate => {
+        candidateDataMap[candidate] = [];
+      });
+
+      // 데이터를 역순으로 처리하기 전에 원본 배열 복사
+      const sortedRows = [...rows].reverse();
+
+      // (3) CSV 각 행을 순회하며, date_day와 후보자 퍼센트를 추출
+      // 데이터를 역순으로 처리하여 오래된 날짜부터 최신 날짜 순으로 정렬
+      sortedRows.forEach(row => {
+        // A. X축 라벨: row["date_day"] (예: "2025-03-10")
+        const dateDay = row["date_day"];
+        // 원본 날짜 저장
+        originalDates.push(dateDay);
+        // 날짜 포맷팅 (M/D(ddd))
+        const formattedDate = dayjs(dateDay).format('M/D(ddd)');
+        labels.push(formattedDate);
+
+        // B. 후보자별 퍼센트 값을 숫자로 변환
+        candidateLabels.forEach(candidate => {
+          // 예: row["이재명"]가 "44%" 형태라면, "%" 제거 후 parseFloat
+          const rawValue = row[candidate] || "0%";
+          const numericValue = parseFloat(rawValue.replace("%", "")) || 0;
+          candidateDataMap[candidate].push(numericValue);
+        });
+      });
+
+      // (4) Chart.js에 사용할 datasets 배열 생성
+      const datasets = candidateLabels.map(candidate => {
+        return {
+          label: candidate,
+          data: candidateDataMap[candidate],
+          fill: false,
+          borderWidth: 3,
+          borderColor: candidateColors[candidate],
+          backgroundColor: candidateColors[candidate],
+          tension: 0.2,
+          pointRadius: 2,
+          pointHoverRadius: 6,
+          borderDash: candidateStyles[candidate].borderDash,
+          pointStyle: candidateStyles[candidate].pointStyle,
+          hidden: !visibleCandidates.includes(candidate)
+        };
+      });
+
+      // (5) 차트 생성 또는 업데이트
+      const ctx = document.getElementById('electionChart').getContext('2d');
+      
+      // 최대값 계산
+      let maxValue = 0;
+      candidateLabels.forEach(candidate => {
+        const candidateMax = Math.max(...candidateDataMap[candidate]);
+        maxValue = Math.max(maxValue, candidateMax);
+      });
+
+      // Y축 최대값 설정 (기본 50%, 데이터가 50% 초과시 올림하여 설정)
+      const yAxisMax = maxValue > 50 ? Math.ceil(maxValue / 10) * 10 : 50;
+
+      if (chart) {
+        // 기존 차트 업데이트
+        chart.data.labels = labels;
+        chart.data.datasets = datasets;
+        chart.data.originalDates = originalDates; // 원본 날짜 데이터 업데이트
+        chart.options.scales.y.max = yAxisMax;
+        chart.update();
+      } else {
+        // 다크모드 여부에 따른 차트 색상 설정
+        const isDarkMode = body.classList.contains('dark-mode');
+        const gridColor = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
+        const textColor = isDarkMode ? '#e0e0e0' : '#333';
+        const tickColor = isDarkMode ? '#adb5bd' : '#666';
+        
+        // 차트 옵션 설정
+        const chartOptions = {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: true,
+              text: '후보자별 검색 비율(%)',
+              font: {
+                size: 16,
+                weight: 'bold'
+              },
+              padding: {
+                top: 10,
+                bottom: 20
+              },
+              color: textColor
+            },
+            tooltip: {
+              mode: 'index',
+              intersect: false,
+              position: 'nearest',
+              itemSort: function(a, b) {
+                return b.raw - a.raw;
+              },
+              callbacks: {
+                title: function(tooltipItems) {
+                  // 데이터 인덱스 가져오기
+                  const dataIndex = tooltipItems[0].dataIndex;
+                  
+                  // 차트 데이터에 저장된 원본 날짜 배열에서 해당 인덱스의 날짜 가져오기
+                  const originalDate = chart.data.originalDates[dataIndex];
+                  
+                  // 원본 날짜 데이터로 포맷팅
+                  return dayjs(originalDate).format('YYYY년 M월 D일 (ddd)');
+                },
+                label: function(context) {
+                  const candidate = context.dataset.label;
+                  const value = context.raw;
+                  return `${candidate}: ${value}%`;
+                },
+                labelPointStyle: function(context) {
+                  const candidate = context.dataset.label;
+                  return {
+                    pointStyle: candidateStyles[candidate].pointStyle,
+                    rotation: 0
+                  };
+                }
+              }
+            },
+            legend: {
+              display: false
+            }
+          },
+          interaction: {
+            mode: 'nearest',
+            intersect: false,
+            axis: 'x'
+          },
+          scales: {
+            x: {
+              display: true,
+              title: {
+                display: true,
+                text: '날짜',
+                font: {
+                  weight: 'bold'
+                },
+                color: tickColor
+              },
+              grid: {
+                display: false,
+                color: gridColor
+              },
+              ticks: {
+                color: tickColor
+              }
+            },
+            y: {
+              display: true,
+              title: {
+                display: true,
+                text: '비율(%)',
+                font: {
+                  weight: 'bold'
+                },
+                color: tickColor
+              },
+              min: 0,
+              max: yAxisMax,
+              ticks: {
+                stepSize: yAxisMax <= 50 ? 5 : 10,
+                color: tickColor
+              },
+              grid: {
+                color: gridColor
+              }
+            }
+          }
+        };
+
+        // datalabels 플러그인이 로드되었을 경우에만 설정 추가
+        if (ChartDataLabels) {
+          chartOptions.plugins.datalabels = {
+            align: 'right',
+            anchor: 'end',
+            formatter: function(value, context) {
+              // 후보자 이름과 비율을 함께 표시
+              return `${context.dataset.label}: ${value}%`;
+            },
+            color: function(context) {
+              return context.dataset.borderColor;
+            },
+            font: {
+              weight: 'bold',
+              size: 12
+            },
+            offset: 10,
+            padding: 6,
+            backgroundColor: function(context) {
+              const isDarkMode = body.classList.contains('dark-mode');
+              return isDarkMode ? 'rgba(40, 40, 40, 0.9)' : 'rgba(255, 255, 255, 0.9)';
+            },
+            borderColor: function(context) {
+              return context.dataset.borderColor;
+            },
+            borderWidth: 1,
+            borderRadius: 4,
+            textAlign: 'left',
+            display: function(context) {
+              // 마지막 데이터 포인트에만 표시하고 숨겨진 계열은 제외
+              return context.dataIndex === context.dataset.data.length - 1 && !context.dataset.hidden;
+            }
+          };
+        }
+
+        // 새 차트 생성
+        chart = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: datasets,
+            originalDates: originalDates // 원본 날짜 데이터 추가
+          },
+          options: chartOptions
+        });
+      }
+    }
+
+    function setDateRange(days) {
+      const endDate = new Date(allData[0]["date_day"]);
+      const startDate = new Date(endDate);
+      startDate.setDate(endDate.getDate() - days);
+
+      document.getElementById('startDate').value = formatDate(startDate);
+      document.getElementById('endDate').value = formatDate(endDate);
+
+      applyDateFilter();
+    }
+  </script>
+</body>
+</html>
