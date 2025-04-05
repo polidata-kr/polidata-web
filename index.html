@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
@@ -65,6 +64,7 @@
       margin: auto;
       height: 70vh;
       width: 100%;
+      padding: 10px;
     }
     
     .loading {
@@ -146,23 +146,51 @@
     
     .legend-item {
       display: flex;
+      flex-direction: column;
       align-items: center;
       cursor: pointer;
+      padding: 10px;
+      border-radius: 8px;
+      transition: all 0.2s;
+      width: 100px;
+    }
+    
+    .legend-item:hover {
+      background-color: var(--background-color);
+      transform: translateY(-2px);
+    }
+    
+    .legend-image {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      margin-bottom: 8px;
+      border: 3px solid transparent;
+      transition: border-color 0.2s;
+    }
+    
+    .legend-item.inactive .legend-image {
+      opacity: 0.5;
     }
     
     .legend-color {
-      width: 20px;
-      height: 20px;
-      margin-right: 5px;
-      border-radius: 3px;
+      display: none; /* 기존 색상 박스 숨김 */
     }
     
     .legend-text {
       font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      margin-bottom: 4px;
     }
     
-    .legend-text.inactive {
-      text-decoration: line-through;
+    .legend-percentage {
+      font-size: 16px;
+      font-weight: bold;
+      color: var(--header-color);
+    }
+    
+    .legend-item.inactive .legend-percentage {
       opacity: 0.5;
     }
     
@@ -211,12 +239,32 @@
       }
       
       h1 {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
       }
       
       .theme-toggle {
         top: 10px;
         right: 10px;
+      }
+      
+      .legend-item {
+        padding: 8px 12px;
+      }
+      
+      .legend-color {
+        width: 20px;
+        height: 20px;
+      }
+      
+      .date-range {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .date-range input, 
+      .date-range button {
+        margin: 5px 0;
+        height: 44px;
       }
     }
   </style>
@@ -262,6 +310,9 @@
     
     <footer>
       데이터 출처: Google Sheets 공개 CSV | 마지막 업데이트: <span id="lastUpdate">로딩 중...</span>
+      <div class="disclaimer" style="margin-top: 15px; font-size: 11px; line-height: 1.4; color: var(--footer-color); max-width: 800px; margin-left: auto; margin-right: auto; text-align: justify;">
+        본 웹사이트에 제공되는 모든 데이터 및 정보는 공개된 자료를 토대로 수집 및 가공된 것으로, 그 정확성, 신뢰성 및 완전성에 대해 어떠한 보증도 하지 않습니다. 이용자는 본 데이터를 전적으로 자신의 판단과 책임 하에 활용하며, 이로 인하여 발생하는 모든 법적 문제 및 손해에 대해서는 웹사이트 운영자 및 관련 당사자가 책임지지 않습니다. 또한, 데이터의 저작권, 사용 권한 및 기타 법적 이슈와 관련하여 사전 통지 없이 변경될 수 있음을 명시하며, 별도의 명시적 합의가 없는 한 모든 법적 책임은 이용자에게 있음을 알려드립니다.
+      </div>
     </footer>
   </div>
 
@@ -306,14 +357,11 @@
         
         // 차트 테마 업데이트 (라이트모드)
         if (chart) {
-          chart.options.scales.x.grid.color = 'rgba(0, 0, 0, 0.1)';
-          chart.options.scales.y.grid.color = 'rgba(0, 0, 0, 0.1)';
           chart.options.scales.x.ticks.color = '#666';
           chart.options.scales.y.ticks.color = '#666';
           chart.options.scales.x.title.color = '#666';
           chart.options.scales.y.title.color = '#666';
           chart.options.plugins.title.color = '#333';
-          // datalabels 배경색 업데이트
           chart.update();
         }
       } else {
@@ -323,14 +371,11 @@
         
         // 차트 테마 업데이트 (다크모드)
         if (chart) {
-          chart.options.scales.x.grid.color = 'rgba(255, 255, 255, 0.1)';
-          chart.options.scales.y.grid.color = 'rgba(255, 255, 255, 0.1)';
           chart.options.scales.x.ticks.color = '#adb5bd';
           chart.options.scales.y.ticks.color = '#adb5bd';
           chart.options.scales.x.title.color = '#e0e0e0';
           chart.options.scales.y.title.color = '#e0e0e0';
           chart.options.plugins.title.color = '#e0e0e0';
-          // datalabels 배경색 업데이트
           chart.update();
         }
       }
@@ -356,26 +401,38 @@
     
     // 3) 후보자별 색상 지정
     const candidateColors = {
-      "이재명": "#152484", // 더불어민주당
-      "김동연": "#152484", // 더불어민주당
-      "김문수": "#E61E2B", // 국민의힘
-      "한동훈": "#E61E2B", // 국민의힘
-      "홍준표": "#E61E2B", // 국민의힘
-      "오세훈": "#E61E2B", // 국민의힘
-      "이준석": "#FF7210", // 개혁신당
-      "이낙연": "#45BABD"  // 새미래민주당
+      "이재명": "#152484",
+      "김동연": "#4958B0",
+      "김문수": "#E61E2B",
+      "한동훈": "#FF5C6A",
+      "홍준표": "#B71721",
+      "오세훈": "#FF8A94",
+      "이준석": "#FF7210",
+      "이낙연": "#45BABD"
     };
     
     // 후보자별 라인 스타일 설정
     const candidateStyles = {
       "이재명": { borderDash: [], pointStyle: 'circle' },
-      "김동연": { borderDash: [5, 5], pointStyle: 'triangle' },
-      "김문수": { borderDash: [], pointStyle: 'circle' },
+      "김동연": { borderDash: [10, 5], pointStyle: 'triangle' },
+      "김문수": { borderDash: [], pointStyle: 'rect' },
       "한동훈": { borderDash: [5, 5], pointStyle: 'triangle' },
-      "홍준표": { borderDash: [10, 10], pointStyle: 'rect' },
-      "오세훈": { borderDash: [15, 5], pointStyle: 'star' },
-      "이준석": { borderDash: [], pointStyle: 'circle' },
-      "이낙연": { borderDash: [], pointStyle: 'circle' }
+      "홍준표": { borderDash: [15, 3], pointStyle: 'rect' },
+      "오세훈": { borderDash: [8, 8], pointStyle: 'star' },
+      "이준석": { borderDash: [2, 2], pointStyle: 'circle' },
+      "이낙연": { borderDash: [12, 3], pointStyle: 'circle' }
+    };
+    
+    // 후보자별 이미지 URL 업데이트
+    const candidateImages = {
+      "이재명": "https://i.namu.wiki/i/HRl3tqzehPKPS1ycNmWoijduX-Y8tbda_Tc-TPPwiRt0j67yralDxXTOFbDr1QstdWGIj3BR_wYYbEYOm8JeDthReHTo4wOdf1yWgGRhEoLf-f-u0aC20uhqipZ2kLVpGhruarSsg4jFJAiXrZdTcw.webp",
+      "김동연": "https://i.namu.wiki/i/rNjm947tSGuwD8JkqWt7jfR-RhLtLMYqSzA1rNcgbBT63QvJqxSDGuKblhOmkRsDPFQqkSTu59-I72F63T7-GES5DQ1d3WVmhYzO_iomaSL8ckiIX7rqW2tZq1UuttZ58tRtHZoXuwOlFmekyt9uug.webp",
+      "김문수": "https://i.namu.wiki/i/IB0A2SrSD5GRod3w6uxKMTkz1yPctPeKla54wtUcc7sdxrEkQjbWIxmkwH0M6gnnfMplo9YZIxRe79jsFhxUhrwLKs-GuLRPFS9POyRBCLLDaofSpK4xsscws4J7b2vQjKIkVvwHjvf4mrhW1Yk2NA.webp",
+      "한동훈": "https://i.namu.wiki/i/y4VZDisGo3iS34VAAsTbjSpsbPrJ6Ox5FFVy-LL2rawisQ8yrHr7ZC5Msk1409f3usVAOToVy03N7H9Z1mozYfXk9qeXid-cRZu0BNN-jq38P2pzKeQHxlPdiTRNZR_87Lixo3NvbX3ZgeNJ3VUhFA.webp",
+      "홍준표": "https://i.namu.wiki/i/uyc8ltZ5EiLUlTIhXnMcXP3srP0u8aTpvPOy5GbAn-hzXA6ggYHafBWmkuUpQ5-W3PUhcHI1QexFJsjiiM8yQprWQAHTu2XsVevo6on8iQ2XtvqDwcpL7nGZL-_lUkYoeU8YOtKZcfu84qw8wUPykw.webp",
+      "오세훈": "https://i.namu.wiki/i/NZs4RwPqxiSbewfz_aZOJTZmuHvAU1JSl8iugfrgLTLNZmmn8xBgkOjjQYWK3QIUEl3bTZRqUuIbNFeniihOhOMIOskoeqvvDg9uVHeECPqMbm_Q5gdODL79GShJykzH1KOBwsvBuMWxbW4DbnQpMA.webp",
+      "이준석": "https://i.namu.wiki/i/Kqqk3XNnhU2z-ng5tqtrGmLjU81GOYW_1tcCklq0wZ_xUVUuUmXQgLUVj84UiTZdx0OVnP4RgrhF6zTAuI2Rdpz6MOpq2hamKzJ6jjMWeZew1WDMtw9GjTGtDWGM809m8D_rZxXajFJiU1SrWaErBw.webp",
+      "이낙연": "https://i.namu.wiki/i/d2H0Nidrt55samE1Q0R8vXYMmeOR6ZlHKGO799ub5uGEWFqZBfKXZu6AdfA33yE1YdUueZcZM_wi4eadUpwBItRF00EO7kEKN8KUcWJO3S3jXQuLFcS6fFB-lRR9Kuro-stqwwsdOG9a7457EyncQQ.webp"
     };
     
     // 전역 변수
@@ -424,10 +481,9 @@
         .then(data => {
           if (data && data.values && data.values.length > 0) {
             // API 응답에서 데이터 추출 및 가공
-            const headers = data.values[0]; // 첫 번째 행은 헤더
-            const rows = data.values.slice(1); // 나머지 행은 데이터
+            const headers = data.values[0];
+            const rows = data.values.slice(1);
             
-            // 헤더와 데이터를 결합하여 객체 배열 생성
             const parsedData = rows.map(row => {
               const rowData = {};
               headers.forEach((header, index) => {
@@ -438,10 +494,8 @@
             
             processData(parsedData);
             
-            // 실제 데이터 사용 알림
-            const footer = document.querySelector('footer');
-            footer.innerHTML = `데이터 출처: Google Sheets API | 마지막 업데이트: <span id="lastUpdate">로딩 중...</span>`;
-            updateLastUpdateDate();
+            // 마지막 업데이트 날짜만 변경하고 면책조항은 유지
+            document.getElementById('lastUpdate').textContent = dayjs(parsedData[0].date_day).format('YYYY년 MM월 DD일');
           } else {
             throw new Error("API 응답에 데이터가 없거나 형식이 올바르지 않습니다.");
           }
@@ -623,44 +677,110 @@
       const legendContainer = document.getElementById('candidateLegend');
       legendContainer.innerHTML = '';
       
-      candidateLabels.forEach(candidate => {
+      // 후보자 범례를 담을 div 생성 (래퍼 구조 단순화)
+      const candidatesDiv = document.createElement('div');
+      candidatesDiv.style.display = 'flex';
+      candidatesDiv.style.flexWrap = 'wrap';
+      candidatesDiv.style.gap = '20px';
+      candidatesDiv.style.justifyContent = 'center';
+      
+      // 최신 데이터 가져오기
+      const latestData = allData[0];
+      
+      // 후보자를 최신 퍼센트 기준으로 내림차순 정렬
+      const sortedCandidates = [...candidateLabels].sort((a, b) => {
+        const valueA = parseFloat((latestData[a] || "0%").replace("%", "")) || 0;
+        const valueB = parseFloat((latestData[b] || "0%").replace("%", "")) || 0;
+        return valueB - valueA; // 내림차순 정렬
+      });
+      
+      sortedCandidates.forEach(candidate => {
         const legendItem = document.createElement('div');
         legendItem.className = 'legend-item';
         legendItem.dataset.candidate = candidate;
         
-        const colorBox = document.createElement('div');
-        colorBox.className = 'legend-color';
-        colorBox.style.backgroundColor = candidateColors[candidate];
+        // 이미지 컨테이너 수정
+        const imageContainer = document.createElement('div');
+        imageContainer.style.width = '60px';
+        imageContainer.style.height = '60px';
+        imageContainer.style.borderRadius = '50%';
+        imageContainer.style.backgroundColor = candidateColors[candidate];
+        imageContainer.style.border = `3px solid ${candidateColors[candidate]}`;
+        imageContainer.style.display = 'flex';
+        imageContainer.style.alignItems = 'center';
+        imageContainer.style.justifyContent = 'center';
+        imageContainer.style.marginBottom = '8px';
+        imageContainer.style.overflow = 'hidden'; // 오버플로우 숨김 유지
         
+        // 이미지 요소 수정 - 툴팁과 동일한 스타일
+        const image = new Image();
+        image.className = 'legend-image';
+        image.src = candidateImages[candidate];
+        image.alt = candidate;
+        image.style.width = '100%'; // 100%로 변경 (툴팁과 동일)
+        image.style.height = '100%'; // 100%로 변경 (툴팁과 동일)
+        image.style.objectFit = 'cover';
+        image.style.borderRadius = '0'; // 테두리 없앰 (컨테이너가 이미 원형)
+        
+        // 이미지 로드 실패시 대체 텍스트 표시
+        image.onerror = () => {
+          imageContainer.innerHTML = `
+            <span style="color: white; font-weight: bold; font-size: 20px;">
+              ${candidate.charAt(0)}
+            </span>
+          `;
+        };
+        
+        // 이미지 로드 성공시
+        image.onload = () => {
+          imageContainer.innerHTML = '';
+          imageContainer.appendChild(image);
+        };
+        
+        // 후보자 이름
         const text = document.createElement('span');
         text.className = 'legend-text';
         text.textContent = candidate;
         
-        legendItem.appendChild(colorBox);
+        // 최신 퍼센트 값
+        const percentage = document.createElement('span');
+        percentage.className = 'legend-percentage';
+        const latestValue = latestData[candidate] || "0%";
+        percentage.textContent = latestValue;
+        
+        legendItem.appendChild(imageContainer);
         legendItem.appendChild(text);
+        legendItem.appendChild(percentage);
         
         // 클릭 이벤트 추가
-        legendItem.addEventListener('click', () => toggleCandidate(candidate, text));
+        legendItem.addEventListener('click', () => {
+          toggleCandidate(candidate, legendItem);
+          imageContainer.style.borderColor = visibleCandidates.includes(candidate) ? 
+            candidateColors[candidate] : 'transparent';
+        });
         
-        legendContainer.appendChild(legendItem);
+        candidatesDiv.appendChild(legendItem);
       });
+      
+      // 바로 candidatesDiv를 legendContainer에 추가
+      legendContainer.appendChild(candidatesDiv);
       
       // 모든 후보 표시/숨김 버튼 이벤트
       document.getElementById('toggleAllCandidates').addEventListener('click', toggleAllCandidates);
     }
     
     // 후보자 표시/숨김 토글
-    function toggleCandidate(candidate, textElement) {
+    function toggleCandidate(candidate, legendItem) {
       const index = visibleCandidates.indexOf(candidate);
       
       if (index !== -1) {
         // 후보자 숨기기
         visibleCandidates.splice(index, 1);
-        textElement.classList.add('inactive');
+        legendItem.classList.add('inactive');
       } else {
         // 후보자 표시
         visibleCandidates.push(candidate);
-        textElement.classList.remove('inactive');
+        legendItem.classList.remove('inactive');
       }
       
       // 차트 업데이트
@@ -704,8 +824,169 @@
       const lastDate = new Date(allData[0]["date_day"]);
       const formattedDate = dayjs(lastDate).format('YYYY년 MM월 DD일');
       
+      // lastUpdate 요소만 업데이트하고 면책조항은 유지
       document.getElementById('lastUpdate').textContent = formattedDate;
     }
+
+    // 이미지 캐시를 전역으로 정의 (차트와 툴팁이 공유)
+    const candidateImagesCache = {};
+
+    // Chart.js 기본 툴팁을 커스텀 HTML 툴팁으로 대체
+    const externalTooltipHandler = (context) => {
+      // 툴팁 요소 가져오기
+      const {chart, tooltip} = context;
+      const tooltipEl = getOrCreateTooltip(chart);
+
+      // 툴팁이 숨겨져 있으면 숨기기
+      if (tooltip.opacity === 0) {
+        tooltipEl.style.opacity = 0;
+        return;
+      }
+
+      // 툴팁 데이터 설정
+      if (tooltip.body) {
+        // 헤더 텍스트 설정
+        const titleLines = tooltip.title || [];
+        
+        // 툴팁 내용 초기화
+        const tooltipRoot = tooltipEl.querySelector('.tooltip-content');
+        tooltipRoot.innerHTML = '';
+        
+        // 제목 추가
+        const titleElement = document.createElement('div');
+        titleElement.style.borderBottom = '1px solid #ddd';
+        titleElement.style.marginBottom = '6px';
+        titleElement.style.paddingBottom = '4px';
+        titleElement.style.fontWeight = 'bold';
+        titleElement.style.fontSize = '14px';
+        
+        // 날짜 제목 텍스트 설정 (기존 형식 유지)
+        if (titleLines.length) {
+          const dateStr = titleLines[0];
+          titleElement.textContent = dateStr;
+        }
+        
+        tooltipRoot.appendChild(titleElement);
+        
+        // 툴팁 내용 영역
+        const bodyContainer = document.createElement('div');
+        bodyContainer.style.display = 'flex';
+        bodyContainer.style.flexDirection = 'column';
+        bodyContainer.style.gap = '6px';
+        
+        // 정렬할 데이터포인트 배열 복사 (숨겨진 후보자 제외)
+        const sortedDataPoints = tooltip.dataPoints
+          .filter(dataPoint => !dataPoint.dataset.hidden)
+          .slice();
+        
+        // 내림차순 정렬 (값이 큰 순서대로)
+        sortedDataPoints.sort((a, b) => b.raw - a.raw);
+        
+        // 각 후보자 항목 추가 (내림차순 정렬된 데이터 사용)
+        sortedDataPoints.forEach((dataPoint) => {
+          const candidate = dataPoint.dataset.label;
+          const value = dataPoint.raw; // raw 값은 숫자 형태
+          const color = dataPoint.dataset.borderColor;
+          
+          // 후보자 항목 컨테이너
+          const candidateItem = document.createElement('div');
+          candidateItem.style.display = 'flex';
+          candidateItem.style.alignItems = 'center';
+          candidateItem.style.gap = '8px';
+          
+          // 이미지 또는 색상 원 표시
+          const iconContainer = document.createElement('div');
+          iconContainer.style.width = '24px';
+          iconContainer.style.height = '24px';
+          iconContainer.style.position = 'relative';
+          
+          // 이미지 캐시에서 이미지 불러오기
+          const cachedImg = candidateImagesCache[candidate];
+          
+          if (cachedImg && cachedImg !== 'error') {
+            // 이미지 컨테이너 (원 모양)
+            iconContainer.style.borderRadius = '50%';
+            iconContainer.style.overflow = 'hidden';
+            iconContainer.style.border = `2px solid ${color}`;
+            
+            // 이미지 요소
+            const imgElement = document.createElement('img');
+            imgElement.src = candidateImages[candidate];
+            imgElement.style.width = '100%';
+            imgElement.style.height = '100%';
+            imgElement.style.objectFit = 'cover';
+            
+            iconContainer.appendChild(imgElement);
+          } else {
+            // 이미지가 없으면 원형 색상 표시
+            iconContainer.style.backgroundColor = color;
+            iconContainer.style.borderRadius = '50%';
+          }
+          
+          // 후보자 이름 및 값
+          const textContainer = document.createElement('div');
+          textContainer.style.display = 'flex';
+          textContainer.style.justifyContent = 'space-between';
+          textContainer.style.flex = '1';
+          
+          const nameElement = document.createElement('span');
+          nameElement.textContent = candidate;
+          nameElement.style.fontWeight = '500';
+          
+          const valueElement = document.createElement('span');
+          valueElement.textContent = value + '%'; // '%' 기호 명시적으로 추가
+          valueElement.style.fontWeight = 'bold';
+          
+          textContainer.appendChild(nameElement);
+          textContainer.appendChild(valueElement);
+          
+          candidateItem.appendChild(iconContainer);
+          candidateItem.appendChild(textContainer);
+          
+          bodyContainer.appendChild(candidateItem);
+        });
+        
+        tooltipRoot.appendChild(bodyContainer);
+      }
+
+      // 툴팁 위치 및 표시 설정
+      const {offsetLeft: positionX, offsetTop: positionY} = chart.canvas;
+      
+      tooltipEl.style.opacity = 1;
+      tooltipEl.style.left = positionX + tooltip.caretX + 'px';
+      tooltipEl.style.top = positionY + tooltip.caretY + 10 + 'px';
+      tooltipEl.style.transform = 'translate(-50%, -110%)';
+    };
+
+    // 툴팁 요소 생성 또는 가져오기
+    const getOrCreateTooltip = (chart) => {
+      let tooltipEl = document.getElementById('chartjs-tooltip');
+      
+      if (!tooltipEl) {
+        tooltipEl = document.createElement('div');
+        tooltipEl.id = 'chartjs-tooltip';
+        tooltipEl.style.background = 'rgba(255, 255, 255, 0.95)';
+        tooltipEl.style.borderRadius = '5px';
+        tooltipEl.style.color = '#333';
+        tooltipEl.style.opacity = 0;
+        tooltipEl.style.pointerEvents = 'none';
+        tooltipEl.style.position = 'absolute';
+        tooltipEl.style.transform = 'translate(-50%, 0)';
+        tooltipEl.style.transition = 'all .1s ease';
+        tooltipEl.style.minWidth = '200px';
+        tooltipEl.style.padding = '10px';
+        tooltipEl.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
+        tooltipEl.style.zIndex = '999';
+        
+        const tooltipContent = document.createElement('div');
+        tooltipContent.className = 'tooltip-content';
+        tooltipEl.appendChild(tooltipContent);
+        
+        document.body.appendChild(tooltipEl);
+      }
+      
+      return tooltipEl;
+    };
 
     // 차트를 그리는 함수
     function renderChart(rows) {
@@ -746,20 +1027,31 @@
 
       // (4) Chart.js에 사용할 datasets 배열 생성
       const datasets = candidateLabels.map(candidate => {
-        return {
+        const dataset = {
           label: candidate,
           data: candidateDataMap[candidate],
           fill: false,
-          borderWidth: 3,
+          borderWidth: 4,
           borderColor: candidateColors[candidate],
           backgroundColor: candidateColors[candidate],
           tension: 0.2,
-          pointRadius: 2,
-          pointHoverRadius: 6,
+          pointRadius: new Array(candidateDataMap[candidate].length).fill(4),
+          pointHoverRadius: 10,
           borderDash: candidateStyles[candidate].borderDash,
           pointStyle: candidateStyles[candidate].pointStyle,
           hidden: !visibleCandidates.includes(candidate)
         };
+
+        // 최신 데이터 포인트 강조
+        if (dataset.data.length > 0) {
+          dataset.pointRadius[dataset.data.length - 1] = 6;
+          dataset.pointBorderWidth = new Array(dataset.data.length).fill(1.5);
+          dataset.pointBorderWidth[dataset.data.length - 1] = 3;
+          dataset.pointBackgroundColor = new Array(dataset.data.length).fill(dataset.backgroundColor);
+          dataset.pointBackgroundColor[dataset.data.length - 1] = body.classList.contains('dark-mode') ? '#ffffff' : '#ffffff';
+        }
+
+        return dataset;
       });
 
       // (5) 차트 생성 또는 업데이트
@@ -794,6 +1086,9 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
+            legend: {
+              display: false
+            },
             title: {
               display: true,
               text: '후보자별 검색 비율(%)',
@@ -808,135 +1103,84 @@
               color: textColor
             },
             tooltip: {
+              enabled: false,  // 기본 툴팁 비활성화
+              external: externalTooltipHandler,  // 커스텀 툴팁 사용
               mode: 'index',
-              intersect: false,
-              position: 'nearest',
-              itemSort: function(a, b) {
-                return b.raw - a.raw;
-              },
-              callbacks: {
-                title: function(tooltipItems) {
-                  // 데이터 인덱스 가져오기
-                  const dataIndex = tooltipItems[0].dataIndex;
-                  
-                  // 차트 데이터에 저장된 원본 날짜 배열에서 해당 인덱스의 날짜 가져오기
-                  const originalDate = chart.data.originalDates[dataIndex];
-                  
-                  // 원본 날짜 데이터로 포맷팅
-                  return dayjs(originalDate).format('YYYY년 M월 D일 (ddd)');
-                },
-                label: function(context) {
-                  const candidate = context.dataset.label;
-                  const value = context.raw;
-                  return `${candidate}: ${value}%`;
-                },
-                labelPointStyle: function(context) {
-                  const candidate = context.dataset.label;
-                  return {
-                    pointStyle: candidateStyles[candidate].pointStyle,
-                    rotation: 0
-                  };
-                }
-              }
+              intersect: false
             },
-            legend: {
+            // datalabels 플러그인 비활성화 (중복 툴팁 방지)
+            datalabels: {
               display: false
             }
           },
-          interaction: {
-            mode: 'nearest',
-            intersect: false,
-            axis: 'x'
-          },
           scales: {
             x: {
-              display: true,
-              title: {
-                display: true,
-                text: '날짜',
+              ticks: {
+                color: tickColor,
+                maxRotation: 45,
+                minRotation: 45,
                 font: {
-                  weight: 'bold'
+                  size: 11
                 },
-                color: tickColor
+                autoSkip: true,
+                autoSkipPadding: 10
               },
               grid: {
-                display: false,
-                color: gridColor
-              },
-              ticks: {
-                color: tickColor
+                display: false
               }
             },
             y: {
-              display: true,
-              title: {
-                display: true,
-                text: '비율(%)',
-                font: {
-                  weight: 'bold'
-                },
-                color: tickColor
-              },
-              min: 0,
-              max: yAxisMax,
               ticks: {
-                stepSize: yAxisMax <= 50 ? 5 : 10,
-                color: tickColor
+                color: tickColor,
+                font: {
+                  size: 11
+                },
+                callback: function(value) {
+                  return value + '%';
+                }
               },
               grid: {
-                color: gridColor
+                display: false
               }
             }
           }
         };
 
-        // datalabels 플러그인이 로드되었을 경우에만 설정 추가
-        if (ChartDataLabels) {
-          chartOptions.plugins.datalabels = {
-            align: 'right',
-            anchor: 'end',
-            formatter: function(value, context) {
-              // 후보자 이름과 비율을 함께 표시
-              return `${context.dataset.label}: ${value}%`;
-            },
-            color: function(context) {
-              return context.dataset.borderColor;
-            },
-            font: {
-              weight: 'bold',
-              size: 12
-            },
-            offset: 10,
-            padding: 6,
-            backgroundColor: function(context) {
-              const isDarkMode = body.classList.contains('dark-mode');
-              return isDarkMode ? 'rgba(40, 40, 40, 0.9)' : 'rgba(255, 255, 255, 0.9)';
-            },
-            borderColor: function(context) {
-              return context.dataset.borderColor;
-            },
-            borderWidth: 1,
-            borderRadius: 4,
-            textAlign: 'left',
-            display: function(context) {
-              // 마지막 데이터 포인트에만 표시하고 숨겨진 계열은 제외
-              return context.dataIndex === context.dataset.data.length - 1 && !context.dataset.hidden;
-            }
-          };
-        }
-
-        // 새 차트 생성
+        // Chart 객체 생성 시 플러그인 포함
         chart = new Chart(ctx, {
           type: 'line',
           data: {
             labels: labels,
             datasets: datasets,
-            originalDates: originalDates // 원본 날짜 데이터 추가
+            originalDates: originalDates
           },
-          options: chartOptions
+          options: chartOptions,
+          plugins: [candidateLabelPlugin]
         });
       }
     }
+
+    // 2. candidateLabelPlugin 추가
+    // 차트 위에 후보자 이름을 표시하는 플러그인 정의
+    const candidateLabelPlugin = {
+      id: 'candidateLabels',
+      beforeInit: (chart) => {
+        // 차트가 처음 초기화될 때만 이미지 로드 (성능 개선)
+        candidateLabels.forEach(candidate => {
+          if (!candidateImagesCache[candidate]) {
+            const img = new Image();
+            img.src = candidateImages[candidate];
+            img.onload = () => {
+              candidateImagesCache[candidate] = img;
+            };
+            img.onerror = () => {
+              console.log(`후보자 이미지 로드 실패: ${candidate}`);
+              candidateImagesCache[candidate] = 'error'; 
+            };
+          }
+        });
+      },
+    };
 
     function setDateRange(days) {
       const endDate = new Date(allData[0]["date_day"]);
