@@ -236,10 +236,12 @@
     @media (max-width: 768px) {
       .chart-container {
         height: 60vh;
+        padding: 5px;
       }
       
       h1 {
-        font-size: 1.4rem;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
       }
       
       .theme-toggle {
@@ -247,24 +249,73 @@
         right: 10px;
       }
       
-      .legend-item {
-        padding: 8px 12px;
-      }
-      
-      .legend-color {
-        width: 20px;
-        height: 20px;
+      .theme-toggle-button {
+        padding: 5px 8px;
+        font-size: 12px;
       }
       
       .date-range {
         flex-direction: column;
         align-items: stretch;
+        margin-bottom: 10px;
+        gap: 5px;
       }
       
       .date-range input, 
       .date-range button {
-        margin: 5px 0;
-        height: 44px;
+        margin: 2px 0;
+        height: 36px;
+        font-size: 13px;
+      }
+      
+      .controls button {
+        padding: 6px 10px;
+        font-size: 13px;
+      }
+      
+      /* 레전드 아이템 크기 축소 */
+      .legend-item {
+        padding: 5px;
+        width: 70px;
+        margin-bottom: 5px;
+      }
+      
+      .legend-item .legend-image,
+      .legend-item div[style*="border-radius: 50%"] {
+        width: 40px !important;
+        height: 40px !important;
+        margin-bottom: 4px;
+      }
+      
+      .legend-item .legend-text {
+        font-size: 12px;
+        margin-bottom: 2px;
+      }
+      
+      .legend-item .legend-percentage {
+        font-size: 13px;
+      }
+      
+      /* 후보자 레전드 간격 줄이기 */
+      .candidate-legend > div {
+        gap: 8px !important;
+      }
+      
+      .container {
+        padding: 10px;
+      }
+    }
+    
+    /* 매우 작은 화면에서 추가 축소 */
+    @media (max-width: 480px) {
+      .legend-item {
+        width: 60px;
+      }
+      
+      .legend-item .legend-image,
+      .legend-item div[style*="border-radius: 50%"] {
+        width: 35px !important;
+        height: 35px !important;
       }
     }
   </style>
@@ -677,12 +728,17 @@
       const legendContainer = document.getElementById('candidateLegend');
       legendContainer.innerHTML = '';
       
-      // 후보자 범례를 담을 div 생성 (래퍼 구조 단순화)
+      // 후보자 범례를 담을 div 생성
       const candidatesDiv = document.createElement('div');
       candidatesDiv.style.display = 'flex';
       candidatesDiv.style.flexWrap = 'wrap';
-      candidatesDiv.style.gap = '20px';
+      candidatesDiv.style.gap = '15px'; // 기본 간격은 15px
       candidatesDiv.style.justifyContent = 'center';
+      
+      // 모바일 화면에서는 간격 축소
+      if (window.innerWidth <= 768) {
+        candidatesDiv.style.gap = '8px';
+      }
       
       // 최신 데이터 가져오기
       const latestData = allData[0];
@@ -694,15 +750,18 @@
         return valueB - valueA; // 내림차순 정렬
       });
       
+      // 이미지 크기 - 모바일과 데스크톱 대응
+      const imageSize = window.innerWidth <= 768 ? '40px' : '60px';
+      
       sortedCandidates.forEach(candidate => {
         const legendItem = document.createElement('div');
         legendItem.className = 'legend-item';
         legendItem.dataset.candidate = candidate;
         
-        // 이미지 컨테이너 수정
+        // 이미지 컨테이너 수정 - 모바일 대응
         const imageContainer = document.createElement('div');
-        imageContainer.style.width = '60px';
-        imageContainer.style.height = '60px';
+        imageContainer.style.width = imageSize;
+        imageContainer.style.height = imageSize;
         imageContainer.style.borderRadius = '50%';
         imageContainer.style.backgroundColor = candidateColors[candidate];
         imageContainer.style.border = `3px solid ${candidateColors[candidate]}`;
@@ -710,7 +769,7 @@
         imageContainer.style.alignItems = 'center';
         imageContainer.style.justifyContent = 'center';
         imageContainer.style.marginBottom = '8px';
-        imageContainer.style.overflow = 'hidden'; // 오버플로우 숨김 유지
+        imageContainer.style.overflow = 'hidden';
         
         // 이미지 요소 수정 - 툴팁과 동일한 스타일
         const image = new Image();
@@ -949,16 +1008,32 @@
         tooltipRoot.appendChild(bodyContainer);
       }
 
-      // 툴팁 위치 및 표시 설정
+      // 모바일 화면인지 확인
+      const isMobile = window.innerWidth <= 768;
+      
+      // 툴팁 위치 및 표시 설정 수정
       const {offsetLeft: positionX, offsetTop: positionY} = chart.canvas;
       
       tooltipEl.style.opacity = 1;
       tooltipEl.style.left = positionX + tooltip.caretX + 'px';
-      tooltipEl.style.top = positionY + tooltip.caretY + 10 + 'px';
-      tooltipEl.style.transform = 'translate(-50%, -110%)';
+      
+      if (isMobile) {
+        // 모바일에서는 커서 아래에 표시
+        tooltipEl.style.top = positionY + tooltip.caretY + 20 + 'px';
+        tooltipEl.style.transform = 'translate(-50%, 0)';
+        
+        // 모바일에서 툴팁 크기 조정
+        tooltipEl.style.maxWidth = '80vw';
+        tooltipEl.style.minWidth = '160px';
+        tooltipEl.style.fontSize = '12px';
+      } else {
+        // 데스크톱에서는 기존 방식대로 위에 표시
+        tooltipEl.style.top = positionY + tooltip.caretY + 10 + 'px';
+        tooltipEl.style.transform = 'translate(-50%, -110%)';
+      }
     };
 
-    // 툴팁 요소 생성 또는 가져오기
+    // 툴팁 요소 생성 또는 가져오기 - 모바일 대응
     const getOrCreateTooltip = (chart) => {
       let tooltipEl = document.getElementById('chartjs-tooltip');
       
@@ -971,12 +1046,14 @@
         tooltipEl.style.opacity = 0;
         tooltipEl.style.pointerEvents = 'none';
         tooltipEl.style.position = 'absolute';
-        tooltipEl.style.transform = 'translate(-50%, 0)';
         tooltipEl.style.transition = 'all .1s ease';
         tooltipEl.style.minWidth = '200px';
         tooltipEl.style.padding = '10px';
         tooltipEl.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
         tooltipEl.style.zIndex = '999';
+        
+        // 모바일에서 툴팁이 화면 밖으로 벗어나지 않도록 설정
+        tooltipEl.style.maxWidth = window.innerWidth <= 768 ? '80vw' : 'none';
         
         const tooltipContent = document.createElement('div');
         tooltipContent.className = 'tooltip-content';
