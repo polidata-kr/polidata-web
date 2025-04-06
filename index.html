@@ -558,10 +558,6 @@
       <canvas id="electionChart"></canvas>
     </div>
     
-    <div class="controls">
-      <button id="toggleAllCandidates">모든 후보 표시/숨김</button>
-    </div>
-    
     <div class="share-container">
       <button id="kakao-share-btn" class="share-button">
         <img src="kakaotalk.png" alt="카카오톡 로고">
@@ -1102,9 +1098,6 @@
       
       // 바로 candidatesDiv를 legendContainer에 추가
       legendContainer.appendChild(candidatesDiv);
-      
-      // 모든 후보 표시/숨김 버튼 이벤트
-      document.getElementById('toggleAllCandidates').addEventListener('click', toggleAllCandidates);
     }
     
     // 후보자 표시/숨김 토글
@@ -1119,24 +1112,6 @@
         // 후보자 표시
         visibleCandidates.push(candidate);
         legendItem.classList.remove('inactive');
-      }
-      
-      // 차트 업데이트
-      updateChartVisibility();
-    }
-    
-    // 모든 후보자 표시/숨김 토글
-    function toggleAllCandidates() {
-      const legendTexts = document.querySelectorAll('.legend-text');
-      
-      if (visibleCandidates.length > 0) {
-        // 모든 후보자 숨기기
-        visibleCandidates = [];
-        legendTexts.forEach(text => text.classList.add('inactive'));
-      } else {
-        // 모든 후보자 표시
-        visibleCandidates = [...candidateLabels];
-        legendTexts.forEach(text => text.classList.remove('inactive'));
       }
       
       // 차트 업데이트
