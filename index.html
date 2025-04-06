@@ -1,8 +1,61 @@
+<!DOCTYPE html>
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>후보 당선 확률 차트</title>
+  <title>2025 대선 후보별 당선 확률 트렌드 | 실시간 지지율 차트</title>
+  
+  <!-- SEO 최적화를 위한 메타 태그 -->
+  <meta name="description" content="2025년 대통령 선거 후보별 당선 확률과 지지율 트렌드를 실시간으로 확인하세요. 이재명, 한동훈, 이낙연 등 주요 후보들의 최신 지지도 변화를 한눈에 볼 수 있습니다." />
+  <meta name="keywords" content="2025 대선, 대통령 선거, 당선 확률, 지지율, 여론조사, 이재명, 한동훈, 이낙연, 홍준표, 대선 후보" />
+  <meta name="author" content="선거 트렌드 분석팀" />
+  <meta name="robots" content="index, follow" />
+  
+  <!-- GA4 태그 추가 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-E07WSD95DR"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-E07WSD95DR');
+  </script>
+  
+  <!-- 오픈 그래프 태그 -->
+  <meta property="og:title" content="2025 대선 후보별 당선 확률 트렌드" />
+  <meta property="og:description" content="대한민국 2025 대선 후보들의 실시간 지지율과 당선 확률을 차트로 확인하세요." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://yourdomain.com/2025ELECTION/" />
+  <meta property="og:image" content="https://yourdomain.com/2025ELECTION/election-trend-preview.jpg" />
+  
+  <!-- 캐노니컬 태그 -->
+  <link rel="canonical" href="https://yourdomain.com/2025ELECTION/" />
+  
+  <!-- 구조화된 데이터 마크업 -->
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Dataset",
+      "name": "2025 대선 후보별 당선 확률 트렌드",
+      "description": "2025년 대통령 선거 후보들의 당선 확률과 지지율 변화 트렌드 데이터",
+      "keywords": ["대선", "선거", "당선확률", "지지율", "여론조사"],
+      "creator": {
+        "@type": "Organization",
+        "name": "선거 트렌드 분석팀"
+      },
+      "temporalCoverage": "2023-01/2025-03",
+      "variableMeasured": [
+        "이재명 지지율",
+        "한동훈 지지율",
+        "이낙연 지지율",
+        "홍준표 지지율",
+        "김동연 지지율",
+        "오세훈 지지율",
+        "이준석 지지율",
+        "김문수 지지율"
+      ]
+    }
+  </script>
+  
   <style>
     /* 개선된 반응형 스타일 */
     :root {
@@ -17,6 +70,7 @@
       --spinner-border: #f3f3f3;
       --spinner-top: #1a73e8;
       --box-shadow: rgba(0,0,0,0.1);
+      --grid-color: rgba(0,0,0,0.1);
     }
     
     .dark-mode {
@@ -31,6 +85,7 @@
       --spinner-border: #333;
       --spinner-top: #4dabf7;
       --box-shadow: rgba(0,0,0,0.3);
+      --grid-color: rgba(255,255,255,0.1);
     }
     
     body {
@@ -417,7 +472,7 @@
     </div>
     
     <footer>
-      데이터 출처: Google, 네이버 | 마지막 업데이트: <span id="lastUpdate">로딩 중...</span>
+      데이터 출처: <a href="https://www.google.com/" target="_blank" rel="noopener">Google</a>, <a href="https://www.naver.com/" target="_blank" rel="noopener">네이버</a> | 마지막 업데이트: <span id="lastUpdate">로딩 중...</span>
       <div class="disclaimer" style="margin-top: 15px; font-size: 11px; line-height: 1.4; color: var(--footer-color); max-width: 800px; margin-left: auto; margin-right: auto; text-align: justify;">
         본 웹사이트에 제공되는 모든 데이터 및 정보는 공개된 자료를 토대로 수집 및 가공된 것으로, 그 정확성, 신뢰성 및 완전성에 대해 어떠한 보증도 하지 않습니다. 이용자는 본 데이터를 전적으로 자신의 판단과 책임 하에 활용하며, 이로 인하여 발생하는 모든 법적 문제 및 손해에 대해서는 웹사이트 운영자 및 관련 당사자가 책임지지 않습니다. 또한, 데이터의 저작권, 사용 권한 및 기타 법적 이슈와 관련하여 사전 통지 없이 변경될 수 있음을 명시하며, 별도의 명시적 합의가 없는 한 모든 법적 책임은 이용자에게 있음을 알려드립니다.
       </div>
@@ -426,7 +481,7 @@
 
   <!-- Chart.js (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Chart.js Datalabels 플러그인 (CDN) - 버전 변경 및 위치 조정 -->
+  <!-- Chart.js Datalabels 플러그인 (CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
   <!-- Papa Parse (CSV 파싱용, CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
@@ -470,6 +525,7 @@
           chart.options.scales.x.title.color = '#666';
           chart.options.scales.y.title.color = '#666';
           chart.options.plugins.title.color = '#333';
+          chart.options.scales.y.grid.color = 'rgba(0,0,0,0.1)'; // 가로 가이드라인 색상 업데이트
           chart.update();
         }
       } else {
@@ -484,6 +540,7 @@
           chart.options.scales.x.title.color = '#e0e0e0';
           chart.options.scales.y.title.color = '#e0e0e0';
           chart.options.plugins.title.color = '#e0e0e0';
+          chart.options.scales.y.grid.color = 'rgba(255,255,255,0.1)'; // 가로 가이드라인 색상 업데이트
           chart.update();
         }
       }
@@ -560,14 +617,6 @@
     dayjs.locale('ko');
     
     // Google Sheets API를 사용하여 데이터 로드
-    // 참고: Google Sheets API를 사용하려면 다음 단계가 필요합니다:
-    // 1. Google Cloud Console(https://console.cloud.google.com/)에서 프로젝트 생성
-    // 2. Google Sheets API 활성화
-    // 3. API 키 생성 (제한사항: HTTP 리퍼러 제한 설정 권장)
-    // 4. 생성된 API 키를 위의 apiKey 변수에 입력
-    // 5. 스프레드시트 ID와 시트 이름 설정
-    //
-    // 실제 API 키가 설정되어 있으므로 Google Sheets API를 사용합니다.
     loadDataFromGoogleSheetsApi(); // API를 통해 실제 데이터 로드
     
     // Google Sheets API를 사용하여 데이터 로드 함수
@@ -613,12 +662,75 @@
           loadingIndicator.innerHTML = `
             <p>Google Sheets API 데이터 로드 중 오류가 발생했습니다: ${err.message}</p>
             <button id="retryFetch" style="margin-top: 20px;">다시 시도</button>
+            <button id="loadSampleData" style="margin-top: 10px; margin-left: 10px;">샘플 데이터 로드</button>
           `;
           
           document.getElementById('retryFetch').addEventListener('click', () => {
             loadDataFromGoogleSheetsApi();
           });
+          
+          document.getElementById('loadSampleData').addEventListener('click', () => {
+            loadSampleData();
+          });
         });
+    }
+    
+    // 샘플 데이터 로드 함수
+    function loadSampleData() {
+      // 샘플 데이터 생성 로직
+      console.log("샘플 데이터 로딩");
+      
+      // 로딩 인디케이터 업데이트
+      loadingIndicator.innerHTML = `
+        <div class="loading-spinner"></div>
+        <p>샘플 데이터를 준비하는 중입니다...</p>
+      `;
+      
+      // 샘플 데이터 생성
+      const today = new Date();
+      const sampleData = [];
+      
+      // 180일치 데이터 생성
+      for (let i = 179; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        
+        const dataPoint = {
+          "date_day": dateStr
+        };
+        
+        // 임의의 지지율 데이터 생성
+        let remainingPercent = 100;
+        candidateLabels.forEach((candidate, index) => {
+          if (index === candidateLabels.length - 1) {
+            dataPoint[candidate] = remainingPercent.toFixed(1) + "%";
+          } else {
+            // 기본 지지율 + 변동 지지율
+            const baseSupport = [30, 20, 10, 15, 5, 8, 7, 5][index];
+            const variation = Math.sin(i / 20 + index) * 3;
+            let support = Math.max(1, Math.min(50, baseSupport + variation));
+            
+            // 시간에 따른 변화 추가
+            if (i < 60) {
+              if (index === 3) support += (60 - i) / 15;
+              if (index === 0) support -= (60 - i) / 20;
+            }
+            
+            support = Math.round(support * 10) / 10;
+            remainingPercent -= support;
+            dataPoint[candidate] = support.toFixed(1) + "%";
+          }
+        });
+        
+        sampleData.push(dataPoint);
+      }
+      
+      // 1초 후에 샘플 데이터로 처리 (로딩 효과를 위해)
+      setTimeout(() => {
+        processData(sampleData);
+        document.getElementById('lastUpdate').textContent = dayjs(new Date()).format('YYYY년 MM월 DD일') + " (샘플 데이터)";
+      }, 1000);
     }
     
     // 데이터 처리 공통 함수
@@ -1276,7 +1388,11 @@
                 }
               },
               grid: {
-                display: false
+                display: true, // y축 그리드(가로선) 표시
+                color: gridColor, // 그리드 색상 설정
+                drawBorder: false, // 축 테두리 표시 안함
+                drawTicks: false, // 틱 표시 안함
+                lineWidth: 0.5 // 선 굵기 설정
               }
             }
           }
