@@ -234,17 +234,117 @@
     }
     
     @media (max-width: 768px) {
-      .chart-container {
-        height: 60vh;
+      .container {
         padding: 5px;
+        margin: 0;
+        width: 100%;
+        max-width: 100%;
+        border-radius: 0;
+      }
+      
+      body {
+        padding: 0;
+        margin: 0;
       }
       
       h1 {
-        font-size: 1.2rem;
-        margin-bottom: 15px;
+        font-size: 1.1rem;
+        margin-bottom: 10px;
+        margin-top: 10px;
+      }
+      
+      .chart-container {
+        height: 55vh;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+      }
+      
+      .date-range {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-gap: 5px;
+        margin-bottom: 5px;
+        width: 100%;
+      }
+      
+      .date-range label {
+        display: none;
+      }
+      
+      .date-range input {
+        width: 100%;
+        padding: 4px;
+        font-size: 11px;
+        height: 28px;
+        box-sizing: border-box;
+      }
+      
+      .date-buttons {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-gap: 5px;
+        width: 100%;
+        margin-bottom: 5px;
+      }
+      
+      .date-buttons button,
+      .controls button {
+        padding: 4px;
+        font-size: 10px;
+        height: 28px;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+      }
+      
+      #applyDateFilter {
+        content: "적용";
+      }
+      
+      #resetDateFilter {
+        content: "초기화";
+      }
+      
+      #lastWeek {
+        content: "일주일";
+      }
+      
+      #last30Days {
+        content: "30일";
+      }
+      
+      #last3Months {
+        content: "3개월";
+      }
+      
+      .candidate-legend > div {
+        gap: 4px !important;
+      }
+      
+      .legend-item {
+        width: 55px;
+        padding: 3px;
+      }
+      
+      .legend-item .legend-image,
+      .legend-item div[style*="border-radius: 50%"] {
+        width: 32px !important;
+        height: 32px !important;
+        margin-bottom: 2px;
+      }
+      
+      .legend-item .legend-text {
+        font-size: 10px;
+        margin-bottom: 0;
+      }
+      
+      .legend-item .legend-percentage {
+        font-size: 11px;
       }
       
       .theme-toggle {
+        position: absolute;
         top: 10px;
         right: 10px;
       }
@@ -254,55 +354,9 @@
         font-size: 12px;
       }
       
-      .date-range {
-        flex-direction: column;
-        align-items: stretch;
-        margin-bottom: 10px;
-        gap: 5px;
-      }
-      
-      .date-range input, 
-      .date-range button {
-        margin: 2px 0;
-        height: 36px;
-        font-size: 13px;
-      }
-      
-      .controls button {
-        padding: 6px 10px;
-        font-size: 13px;
-      }
-      
-      /* 레전드 아이템 크기 축소 */
-      .legend-item {
-        padding: 5px;
-        width: 70px;
-        margin-bottom: 5px;
-      }
-      
-      .legend-item .legend-image,
-      .legend-item div[style*="border-radius: 50%"] {
-        width: 40px !important;
-        height: 40px !important;
-        margin-bottom: 4px;
-      }
-      
-      .legend-item .legend-text {
-        font-size: 12px;
-        margin-bottom: 2px;
-      }
-      
-      .legend-item .legend-percentage {
-        font-size: 13px;
-      }
-      
-      /* 후보자 레전드 간격 줄이기 */
-      .candidate-legend > div {
-        gap: 8px !important;
-      }
-      
-      .container {
-        padding: 10px;
+      /* 텍스트 숨기기 - 아이콘만 표시 */
+      .theme-toggle-button span:not(.theme-icon) {
+        display: none;
       }
     }
     
@@ -325,22 +379,25 @@
 <body>
   <div class="theme-toggle">
     <button id="themeToggle" class="theme-toggle-button">
-      <span class="theme-icon">🌙</span> 다크모드
+      <span class="theme-icon">🌙</span>
+      <span class="button-text">다크모드</span>
     </button>
   </div>
   <div class="container">
     <h1>2025 대선 후보별 당선 확률 트렌드</h1>
     
     <div class="date-range">
-      <label for="startDate">시작일:</label>
-      <input type="date" id="startDate">
-      <label for="endDate">종료일:</label>
-      <input type="date" id="endDate">
-      <button id="applyDateFilter">적용</button>
-      <button id="resetDateFilter">초기화</button>
-      <button id="lastWeek">직전 일주일</button>
-      <button id="last30Days">직전 30일</button>
-      <button id="last3Months">직전 3개월</button>
+      <div class="date-inputs">
+        <label for="startDate" style="display: none;">시작일:</label>
+        <input type="date" id="startDate" placeholder="시작일">
+        <label for="endDate" style="display: none;">종료일:</label>
+        <input type="date" id="endDate" placeholder="종료일">
+      </div>
+      <div class="date-buttons">
+        <button id="lastWeek">7일</button>
+        <button id="last30Days">30일</button>
+        <button id="last3Months">3개월</button>
+      </div>
     </div>
     
     <div class="candidate-legend" id="candidateLegend">
@@ -360,7 +417,7 @@
     </div>
     
     <footer>
-      데이터 출처: Google Sheets 공개 CSV | 마지막 업데이트: <span id="lastUpdate">로딩 중...</span>
+      데이터 출처: Google, 네이버 | 마지막 업데이트: <span id="lastUpdate">로딩 중...</span>
       <div class="disclaimer" style="margin-top: 15px; font-size: 11px; line-height: 1.4; color: var(--footer-color); max-width: 800px; margin-left: auto; margin-right: auto; text-align: justify;">
         본 웹사이트에 제공되는 모든 데이터 및 정보는 공개된 자료를 토대로 수집 및 가공된 것으로, 그 정확성, 신뢰성 및 완전성에 대해 어떠한 보증도 하지 않습니다. 이용자는 본 데이터를 전적으로 자신의 판단과 책임 하에 활용하며, 이로 인하여 발생하는 모든 법적 문제 및 손해에 대해서는 웹사이트 운영자 및 관련 당사자가 책임지지 않습니다. 또한, 데이터의 저작권, 사용 권한 및 기타 법적 이슈와 관련하여 사전 통지 없이 변경될 수 있음을 명시하며, 별도의 명시적 합의가 없는 한 모든 법적 책임은 이용자에게 있음을 알려드립니다.
       </div>
@@ -397,14 +454,14 @@
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark' || (!savedTheme && prefersDarkScheme.matches)) {
       body.classList.add('dark-mode');
-      themeToggle.innerHTML = '<span class="theme-icon">☀️</span> 라이트모드';
+      themeToggle.innerHTML = '<span class="theme-icon">☀️</span><span class="button-text">라이트모드</span>';
     }
     
     themeToggle.addEventListener('click', () => {
       if (body.classList.contains('dark-mode')) {
         body.classList.remove('dark-mode');
         localStorage.setItem('theme', 'light');
-        themeToggle.innerHTML = '<span class="theme-icon">🌙</span> 다크모드';
+        themeToggle.innerHTML = '<span class="theme-icon">🌙</span><span class="button-text">다크모드</span>';
         
         // 차트 테마 업데이트 (라이트모드)
         if (chart) {
@@ -418,7 +475,7 @@
       } else {
         body.classList.add('dark-mode');
         localStorage.setItem('theme', 'dark');
-        themeToggle.innerHTML = '<span class="theme-icon">☀️</span> 라이트모드';
+        themeToggle.innerHTML = '<span class="theme-icon">☀️</span><span class="button-text">라이트모드</span>';
         
         // 차트 테마 업데이트 (다크모드)
         if (chart) {
@@ -573,10 +630,10 @@
         return new Date(b["date_day"]) - new Date(a["date_day"]);
       });
       
-      // 최근 30일 데이터만 필터링
+      // 최근 3개월(90일) 데이터로 기본 필터링 (기존 30일에서 변경)
       lastDate = new Date(allData[0]["date_day"]);
       thirtyDaysAgo = new Date(lastDate);
-      thirtyDaysAgo.setDate(lastDate.getDate() - 30);
+      thirtyDaysAgo.setDate(lastDate.getDate() - 90); // 90일(3개월)로 변경
       
       filteredData = allData.filter(row => {
         const rowDate = new Date(row["date_day"]);
@@ -606,39 +663,32 @@
       const startDateInput = document.getElementById('startDate');
       const endDateInput = document.getElementById('endDate');
       
-      // 데이터의 첫 날짜와 마지막 날짜 가져오기
-      const firstDate = new Date(allData[allData.length - 1]["date_day"]);
-      
       // 입력 필드에 날짜 설정
-      startDateInput.value = formatDate(thirtyDaysAgo);
+      startDateInput.value = formatDate(thirtyDaysAgo); // 이제 90일 전 날짜
       endDateInput.value = formatDate(lastDate);
       
       // 데이터가 있는 날짜들을 추출하여 배열로 저장
       const availableDates = allData.map(row => row["date_day"]);
       
-      // 날짜 입력 필드에 변경 이벤트 리스너 추가
-      startDateInput.addEventListener('input', function() {
-        validateDateInput(this, availableDates);
-      });
+      // 기존 이벤트 리스너 제거
+      startDateInput.removeEventListener('input', validateStartDate);
+      endDateInput.removeEventListener('input', validateEndDate);
+      startDateInput.removeEventListener('change', applyDateFilterAuto);
+      endDateInput.removeEventListener('change', applyDateFilterAuto);
       
-      endDateInput.addEventListener('input', function() {
-        validateDateInput(this, availableDates);
-      });
+      // 날짜 입력 필드에 검증 및 자동 필터 이벤트 추가
+      startDateInput.addEventListener('input', validateStartDate);
+      endDateInput.addEventListener('input', validateEndDate);
       
-      // 이벤트 리스너 제거 후 다시 추가 (중복 방지)
-      document.getElementById('applyDateFilter').removeEventListener('click', applyDateFilter);
-      document.getElementById('resetDateFilter').removeEventListener('click', resetDateFilter);
+      // 자동 필터 적용 (입력값 변경 시)
+      startDateInput.addEventListener('change', applyDateFilterAuto);
+      endDateInput.addEventListener('change', applyDateFilterAuto);
+      
+      // 날짜 범위 버튼 이벤트 추가 (기존 코드)
       document.getElementById('lastWeek').removeEventListener('click', () => setDateRange(7));
       document.getElementById('last30Days').removeEventListener('click', () => setDateRange(30));
       document.getElementById('last3Months').removeEventListener('click', () => setDateRange(90));
       
-      // 날짜 필터 적용 버튼 이벤트
-      document.getElementById('applyDateFilter').addEventListener('click', applyDateFilter);
-      
-      // 날짜 필터 초기화 버튼 이벤트
-      document.getElementById('resetDateFilter').addEventListener('click', resetDateFilter);
-      
-      // 날짜 범위 버튼 이벤트 추가
       document.getElementById('lastWeek').addEventListener('click', function() { setDateRange(7); });
       document.getElementById('last30Days').addEventListener('click', function() { setDateRange(30); });
       document.getElementById('last3Months').addEventListener('click', function() { setDateRange(90); });
@@ -646,6 +696,15 @@
       // 사용 가능한 날짜 목록을 설정
       setAvailableDates(startDateInput, availableDates);
       setAvailableDates(endDateInput, availableDates);
+      
+      // 검증 함수
+      function validateStartDate() {
+        validateDateInput(startDateInput, availableDates);
+      }
+      
+      function validateEndDate() {
+        validateDateInput(endDateInput, availableDates);
+      }
     }
     
     // 날짜 입력 필드에 사용 가능한 날짜 설정
@@ -1268,6 +1327,61 @@
       document.getElementById('endDate').value = formatDate(endDate);
 
       applyDateFilter();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      // 모바일 환경 최적화
+      if (window.innerWidth <= 768) {
+        // 컨테이너 최적화
+        document.body.style.padding = '0';
+        document.body.style.margin = '0';
+        
+        const container = document.querySelector('.container');
+        if (container) {
+          container.style.padding = '5px';
+          container.style.maxWidth = '100%';
+          container.style.margin = '0';
+          container.style.borderRadius = '0';
+        }
+        
+        const chartContainer = document.querySelector('.chart-container');
+        if (chartContainer) {
+          chartContainer.style.padding = '0';
+          chartContainer.style.width = '100%';
+        }
+      }
+
+      // Google Sheets 데이터 로드 시작 - 기존 로드 함수를 여기서 호출 (중복 방지)
+      if (typeof loadDataFromGoogleSheetsApi === 'function') {
+        // 기존 로드 함수가 있을 경우 호출
+        setTimeout(function() {
+          loadDataFromGoogleSheetsApi();
+        }, 100);
+      }
+    });
+
+    // 다음 함수를 새로 추가하세요 (applyDateFilter 함수 근처에 추가)
+    function applyDateFilterAuto() {
+      const startDateInput = document.getElementById('startDate');
+      const endDateInput = document.getElementById('endDate');
+      const startDate = new Date(startDateInput.value);
+      const endDate = new Date(endDateInput.value);
+      
+      // 종료일이 시작일보다 이전이면 경고
+      if (endDate < startDate) {
+        alert('종료일은 시작일 이후여야 합니다.');
+        endDateInput.value = formatDate(lastDate);
+        return;
+      }
+      
+      // 날짜 범위에 맞는 데이터 필터링
+      filteredData = allData.filter(row => {
+        const rowDate = new Date(row["date_day"]);
+        return rowDate >= startDate && rowDate <= endDate;
+      });
+      
+      // 차트 다시 그리기
+      renderChart(filteredData);
     }
   </script>
 </body>
