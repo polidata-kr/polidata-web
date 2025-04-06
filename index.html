@@ -1037,14 +1037,16 @@
         const imageContainer = document.createElement('div');
         imageContainer.style.width = imageSize;
         imageContainer.style.height = imageSize;
+        imageContainer.style.position = 'relative';
         imageContainer.style.borderRadius = '50%';
         imageContainer.style.backgroundColor = candidateColors[candidate];
         imageContainer.style.border = `3px solid ${candidateColors[candidate]}`;
         imageContainer.style.display = 'flex';
         imageContainer.style.alignItems = 'center';
         imageContainer.style.justifyContent = 'center';
-        imageContainer.style.marginBottom = '8px';
+        imageContainer.style.marginBottom = '1px';
         imageContainer.style.overflow = 'hidden';
+  
         
         // 이미지 요소 수정 - 툴팁과 동일한 스타일
         const image = new Image();
@@ -1054,8 +1056,12 @@
         image.style.width = '100%'; // 100%로 변경 (툴팁과 동일)
         image.style.height = '100%'; // 100%로 변경 (툴팁과 동일)
         image.style.objectFit = 'cover';
-        image.style.borderRadius = '0'; // 테두리 없앰 (컨테이너가 이미 원형)
-        
+        image.style.borderRadius = '50%'; // 테두리 없앰 (컨테이너가 이미 원형)
+        image.style.position = 'absolute';
+        image.style.top = '50%';
+        image.style.left = '50%';
+        image.style.transform = 'translate(-50%, -50%)';
+
         // 이미지 로드 실패시 대체 텍스트 표시
         image.onerror = () => {
           imageContainer.innerHTML = `
