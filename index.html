@@ -24,11 +24,11 @@
   <meta property="og:title" content="2025 대선 후보별 당선 확률 트렌드" />
   <meta property="og:description" content="대한민국 2025 대선 후보들의 실시간 지지율과 당선 확률을 차트로 확인하세요." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://yourdomain.com/2025ELECTION/" />
-  <meta property="og:image" content="preview.jpg" />
+  <meta property="og:url" content="https://polidata.kr" />
+  <meta property="og:image" content="https://i.imgur.com/bjJ0r57.jpeg" />
   
   <!-- 캐노니컬 태그 -->
-  <link rel="canonical" href="https://yourdomain.com/2025ELECTION/" />
+  <link rel="canonical" href="https://polidata.kr" />
   
   <!-- 구조화된 데이터 마크업 -->
   <script type="application/ld+json">
@@ -1250,7 +1250,7 @@
           
           const nameElement = document.createElement('span');
           nameElement.textContent = candidate;
-          nameElement.style.fontWeight = '500';
+          nameElement.style.fontWeight = '300';
           
           const valueElement = document.createElement('span');
           valueElement.textContent = value + '%'; // '%' 기호 명시적으로 추가
@@ -1284,12 +1284,12 @@
         
         // 모바일에서 툴팁 크기 조정
         tooltipEl.style.maxWidth = '80vw';
-        tooltipEl.style.minWidth = '160px';
+        tooltipEl.style.minWidth = '110px';
         tooltipEl.style.fontSize = '12px';
       } else {
         // 데스크톱에서는 기존 방식대로 위에 표시
-        tooltipEl.style.top = positionY + tooltip.caretY + 10 + 'px';
-        tooltipEl.style.transform = 'translate(-50%, -110%)';
+        tooltipEl.style.top = positionY + tooltip.caretY + 20 + 'px';
+        tooltipEl.style.transform = 'translate(-50%, 0)';
       }
     };
 
@@ -1307,7 +1307,7 @@
         tooltipEl.style.pointerEvents = 'none';
         tooltipEl.style.position = 'absolute';
         tooltipEl.style.transition = 'all .1s ease';
-        tooltipEl.style.minWidth = '200px';
+        tooltipEl.style.minWidth = '120px';
         tooltipEl.style.padding = '10px';
         tooltipEl.style.boxShadow = '0 2px 8px rgba(0,0,0,0.15)';
         tooltipEl.style.zIndex = '999';
